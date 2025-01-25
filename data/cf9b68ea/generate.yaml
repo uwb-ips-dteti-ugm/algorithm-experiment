@@ -1,0 +1,31 @@
+anchor0:
+- 0.0
+- 0.0
+- 0.0
+anchor1:
+- 8.45
+- 0.0
+- 0.0
+anchor2:
+- 8.45
+- 9.73
+- 0.0
+anchor3:
+- 0.0
+- 9.73
+- 0.0
+anchor_num: 4
+err_mean: 0.012
+err_stdev: 0.0046
+tag:
+  step: 0.2
+  x_range:
+  - 0.5
+  - 8.1
+  y_range:
+  - 0.5
+  - 9.5
+  z_range:
+  - 0.0
+  - 0.1
+trial_num: 30
