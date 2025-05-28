@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.9.10"
-    kotlin("kapt") version "1.9.10"
+    kotlin("plugin.serialization") version "1.9.0"
+    application
 }
 
 group = "com.rizqi"
@@ -11,19 +12,23 @@ repositories {
 }
 
 dependencies {
-    implementation("com.tinder.scarlet:scarlet:0.1.12")
-    implementation("com.tinder.scarlet:websocket-okhttp:0.1.12")
-    implementation("com.tinder.scarlet:message-adapter-moshi:0.1.12")
-    implementation("com.tinder.scarlet:stream-adapter-coroutines:0.1.12")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.moshi:moshi:1.15.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
-    implementation("com.tinder.scarlet:stream-adapter-rxjava2:0.1.12")
-    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // Ktor Client
+    implementation("io.ktor:ktor-client-core:2.3.3")
+    implementation("io.ktor:ktor-client-cio:2.3.3")
+    implementation("io.ktor:ktor-client-websockets:2.3.3")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.3")
+
+    // Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    // Koin for DI
+    implementation("io.insert-koin:koin-core:3.5.0")
+
+    implementation("org.slf4j:slf4j-simple:1.7.36")
 
     testImplementation(kotlin("test"))
 }

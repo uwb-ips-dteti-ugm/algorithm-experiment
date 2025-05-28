@@ -1,13 +1,27 @@
 package com.rizqi
 
-import com.rizqi.data.remote.WebSocketClient
-import com.rizqi.data.repository.TWRRepositoryImpl
-import com.rizqi.domain.usecase.GetNewPositionUseCase
+import com.rizqi.di.appModule
+import com.rizqi.presentation.UWBViewModel
+import kotlinx.coroutines.runBlocking
+import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
 
-fun main() {
-    val wsClient = WebSocketClient("ws://localhost:8080")
-    val repository = TWRRepositoryImpl(wsClient)
-    val getNewPositionUseCase = GetNewPositionUseCase(repository)
+fun main() = runBlocking{
+    val baseUrl = "ws://localhost:8080"
 
-    getNewPositionUseCase.start()
+    startKoin {
+        modules(appModule(baseUrl))
+    }
+
+    val viewModel: UWBViewModel = GlobalContext.get().get<UWBViewModel>()
+
+    while (true){
+        viewModel.startListening { data ->
+            println("Received: $data")
+        }
+        Thread.sleep(1000) // 1s
+    }
+
+//    viewModel.stop()
 }
+

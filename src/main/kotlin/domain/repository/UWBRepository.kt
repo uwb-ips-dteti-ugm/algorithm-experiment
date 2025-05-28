@@ -1,9 +1,9 @@
-package com.rizqi.data.remote
+package com.rizqi.domain.repository
 
 import com.rizqi.domain.model.TWRData
 
-interface WebSocketService {
+interface UWBRepository {
     suspend fun connect(onDataReceived: (List<TWRData>) -> Unit)
     suspend fun disconnect()
-    suspend fun send(data: TWRData)
+    suspend fun sendData(data: TWRData)
 }
