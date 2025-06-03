@@ -9,47 +9,38 @@ import kotlin.math.sqrt
 
 fun main() {
     val path = "C:\\Users\\Lenovo\\OneDrive\\Dokumen\\dummy_points_dataset.csv"
+    val rows = CsvLoader.loadPerRow(path)
 
-    println("Starting program...")
+    println("Starting optimization for ${rows.size} rows...\n")
 
-    // Load CSV: get distances and actual coordinates
-    val (dataPoints, actualPoints) = CsvLoader.load(path)
-    println("Loaded ${dataPoints.size} data points and ${actualPoints.size} actual points")
+    rows.forEachIndexed { rowIndex, row ->
+        println("========== ROW ${rowIndex + 1} ==========")
 
-    // Use actual points as initial guess
-    val initialGuess = actualPoints.flatMap { listOf(it.x, it.y) }.toDoubleArray()
+        val actualPoints = row.points
+        val distances = row.distances.map { DataPoint(it.first, it.second, it.third) }
 
-    // Predict using Newton-Raphson
-    val predictedVars = newtonRaphson(initialGuess, dataPoints)
+        val initialGuess = DoubleArray(8) { 0.5 }
 
-    println("\n--- Actual vs Predicted ---")
-    var totalError = 0.0
-    predictedVars.asList().chunked(2).forEachIndexed { index, (xPred, yPred) ->
-        val actual = actualPoints[index]
-        val error = sqrt((xPred - actual.x).pow(2) + (yPred - actual.y).pow(2))
-        totalError += error
+        val predictedVars = newtonRaphson(initialGuess, distances, maxIter = 100)
 
-        println("Point $index:")
-        println("  Actual   -> x=${actual.x}, y=${actual.y}")
-        println("  Predicted-> x=$xPred, y=$yPred")
-        println("  Error    -> $error")
-    }
+        for (i in 0 until 4) {
+            val actual = actualPoints[i]
+            val xPred = predictedVars[2 * i]
+            val yPred = predictedVars[2 * i + 1]
+            val xErr = kotlin.math.abs(actual.x - xPred)
+            val yErr = kotlin.math.abs(actual.y - yPred)
 
-    println("\nTotal Error: $totalError")
-    println("Average Error: ${totalError / actualPoints.size}")
-}
+            println("Point ${i + 1}:")
+            println("  x_actual     = ${actual.x}")
+            println("  x_predicted  = $xPred")
+            println("  x_error      = $xErr")
+            println("  y_actual     = ${actual.y}")
+            println("  y_predicted  = $yPred")
+            println("  y_error      = $yErr")
+            println()
+        }
 
-fun printHeader(csvPath: String){
-    val lines = File(csvPath).readLines()
-
-    // Print the header
-    val header = lines.first().split(",")
-    println("Header: $header")
-
-    // Print the first few data rows
-    lines.drop(1).take(5).forEachIndexed { index, line ->
-        val columns = line.split(",")
-        println("Row ${index + 1}: $columns")
+        println("=========================================\n")
     }
 }
 
@@ -140,16 +131,16 @@ fun newtonRaphson(
             x[i] -= delta.getEntry(i)
         }
 
-        println("\n--- Iteration ${iter + 1} ---")
-        println("f(x): ${fWithX(x)}")
-        println("Gradient norm: ${gradVec.norm}")
-        println("Predicted coordinates:")
-        x.asList().chunked(2).forEachIndexed { i, (xPred, yPred) ->
-            println("  Point $i -> x=$xPred, y=$yPred")
-        }
+//        println("\n--- Iteration ${iter + 1} ---")
+//        println("f(x): ${fWithX(x)}")
+//        println("Gradient norm: ${gradVec.norm}")
+//        println("Predicted coordinates:")
+//        x.asList().chunked(2).forEachIndexed { i, (xPred, yPred) ->
+//            println("  Point $i -> x=$xPred, y=$yPred")
+//        }
 
         if (delta.norm < tolerance) {
-            println("Converged at iteration $iter")
+//            println("Converged at iteration $iter")
             break
         }
     }
