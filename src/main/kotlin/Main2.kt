@@ -5,29 +5,42 @@ import java.util.UUID
 import kotlin.math.sqrt
 
 fun main() {
-    val x0 = Variable(id = UUID.randomUUID(), value = 5.0)
-    val x1 = Variable(id = UUID.randomUUID(), value = 1.0)
-    val x2 = Variable(id = UUID.randomUUID(), value = 2.0)
+    val x0 = Variable(id = UUID.randomUUID(), value = 0.0)
+    val x1 = Variable(id = UUID.randomUUID(), value = 1.113437)
+    val x2 = Variable(id = UUID.randomUUID(), value = 1.279734)
+    val x3 = Variable(id = UUID.randomUUID(), value = 0.684363)
 
-    val y0 = Variable(id = UUID.randomUUID(), value = 5.0)
-    val y1 = Variable(id = UUID.randomUUID(), value = 1.0)
-    val y2 = Variable(id = UUID.randomUUID(), value = 8.0)
+    val y0 = Variable(id = UUID.randomUUID(), value = 0.0)
+    val y1 = Variable(id = UUID.randomUUID(), value = 0.804062)
+    val y2 = Variable(id = UUID.randomUUID(), value = 1.983131)
+    val y3 = Variable(id = UUID.randomUUID(), value = 0.344626)
 
     val point0 = Point(UUID.randomUUID(), x0, y0)
     val point1 = Point(UUID.randomUUID(), x1, y1)
     val point2 = Point(UUID.randomUUID(), x2, y2)
-    val points = listOf(point0, point1, point2)
+    val point3 = Point(UUID.randomUUID(), x3, y3)
+    val points = listOf(point0, point1, point2, point3)
 
-    val initPoint0 = Point(UUID.randomUUID(), x0.copy(value = 1.0), y0.copy(value = 1.0))
-    val initPoint1 = Point(UUID.randomUUID(), x1.copy(value = 2.0), y1.copy(value = 2.0))
-    val initPoint2 = Point(UUID.randomUUID(), x2.copy(value = 3.0), y2.copy(value = 3.0))
+    val initPoint0 = Point(UUID.randomUUID(), x0.copy(value = 0.0), y0.copy(value = 0.0))
+    val initPoint1 = Point(UUID.randomUUID(), x1.copy(value = 1.0), y1.copy(value = 0.9))
+    val initPoint2 = Point(UUID.randomUUID(), x2.copy(value = 1.1), y2.copy(value = 1.8))
+    val initPoint3 = Point(UUID.randomUUID(), x3.copy(value = 0.7), y3.copy(value = 0.4))
 
-    val d01 = Distance(initPoint0, initPoint1, 5.66)
-    val d02 = Distance(initPoint0, initPoint2, 4.24)
-    val d12 = Distance(initPoint1, initPoint2, 7.07)
-    val distances = listOf(d01, d02, d12)
+    val d01 = Distance(initPoint0, initPoint1, 1.375032
+    )
+    val d02 = Distance(initPoint0, initPoint2, 2.361733
+    )
+    val d03 = Distance(initPoint0, initPoint3, 0.773008
+    )
+    val d12 = Distance(initPoint1, initPoint2, 1.151819
+    )
+    val d13 = Distance(initPoint1, initPoint3, 0.541212
+    )
+    val d23 = Distance(initPoint2, initPoint3, 1.740796
+    )
+    val distances = listOf(d01, d02, d03, d12, d13, d23)
 
-    val predictedPoints = newtonRaphson(distances, maxIter = 20, h = 0.00001)
+    val predictedPoints = newtonRaphson(distances, maxIter = 100, h = 1e-5)
     println()
 
     for (i in predictedPoints.indices){
@@ -46,7 +59,6 @@ data class Point(
     val x: Variable,
     val y: Variable,
 )
-
 data class Distance(
     var point1: Point,
     var point2: Point,
@@ -83,21 +95,29 @@ fun numericalGradient(
     distances: List<Distance>,
     h: Double = 1e-5,
 ): DoubleArray {
-    println("Variables: ${variables.map{it.value}}")
+    println("Variables: ${variables.map { it.value }}")
+
     val grad = DoubleArray(variables.size)
+    val variableMap = variables.associateBy { it.id }
+
     for (i in variables.indices) {
         val variable = variables[i]
-        val distances1 = distances.deepCopy()
-        val distances2 = distances.deepCopy()
 
-        distances1.forEach { applyDeltaIfMatch(it, variable.id, -h) }
-        distances2.forEach { applyDeltaIfMatch(it, variable.id, +h) }
+        val distances1 = distances.deepCopyWithSharedVariables(variableMap)
+        val distances2 = distances.deepCopyWithSharedVariables(variableMap)
 
+        applyDeltaIfMatchToVariables(variableMap, variable.id, -h)
         val f1 = f(distances1)
+
+        applyDeltaIfMatchToVariables(variableMap, variable.id, +2 * h)
         val f2 = f(distances2)
+
         grad[i] = (f2 - f1) / (2 * h)
 
+        // Reset the variable value
+        variable.value -= h
     }
+
     return grad
 }
 
@@ -105,47 +125,42 @@ fun numericalHessian(
     variables: List<Variable>,
     distances: List<Distance>,
     h: Double = 1e-5,
-) : Array<DoubleArray>{
+): Array<DoubleArray> {
     val n = variables.size
-    val hessian = Array(n){ DoubleArray(n) }
+    val hessian = Array(n) { DoubleArray(n) }
+    val variableMap = variables.associateBy { it.id }
 
-    for (i in 0 until n){
+    for (i in 0 until n) {
         for (j in 0 until n) {
             val vi = variables[i]
             val vj = variables[j]
 
-            val distances1 = distances.deepCopy()
-            val distances2 = distances.deepCopy()
-            val distances3 = distances.deepCopy()
-            val distances4 = distances.deepCopy()
+            // Create 4 shifted copies with shared variables
+            val d1 = distances.deepCopyWithSharedVariables(variableMap)
+            val d2 = distances.deepCopyWithSharedVariables(variableMap)
+            val d3 = distances.deepCopyWithSharedVariables(variableMap)
+            val d4 = distances.deepCopyWithSharedVariables(variableMap)
 
-            distances1.forEach {
-                applyDeltaIfMatch(it, vi.id, +h)
-                applyDeltaIfMatch(it, vj.id, +h)
-            }
+            // Apply deltas to variableMap (shared across copies)
+            applyDeltaIfMatchToVariables(variableMap, vi.id, +h)
+            applyDeltaIfMatchToVariables(variableMap, vj.id, +h)
+            val f1 = f(d1)
 
-            distances2.forEach {
-                applyDeltaIfMatch(it, vi.id, +h)
-                applyDeltaIfMatch(it, vj.id, -h)
-            }
+            applyDeltaIfMatchToVariables(variableMap, vj.id, -2 * h)
+            val f2 = f(d2)
 
-            distances3.forEach {
-                applyDeltaIfMatch(it, vi.id, -h)
-                applyDeltaIfMatch(it, vj.id, +h)
-            }
+            applyDeltaIfMatchToVariables(variableMap, vi.id, -2 * h)
+            applyDeltaIfMatchToVariables(variableMap, vj.id, +2 * h)
+            val f3 = f(d3)
 
-            distances4.forEach {
-                applyDeltaIfMatch(it, vi.id, -h)
-                applyDeltaIfMatch(it, vj.id, -h)
-            }
-
-            val f1 = f(distances1)
-            val f2 = f(distances2)
-            val f3 = f(distances3)
-            val f4 = f(distances4)
+            applyDeltaIfMatchToVariables(variableMap, vj.id, -2 * h)
+            val f4 = f(d4)
 
             hessian[i][j] = (f1 - f2 - f3 + f4) / (4 * h * h)
 
+            // Reset both variable values
+            variableMap[vi.id]?.value = vi.value
+            variableMap[vj.id]?.value = vj.value
         }
     }
 
