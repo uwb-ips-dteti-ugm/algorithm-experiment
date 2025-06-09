@@ -26,22 +26,19 @@ fun main() {
     val initPoint2 = Point(UUID.randomUUID(), x2.copy(value = 1.1), y2.copy(value = 1.8))
     val initPoint3 = Point(UUID.randomUUID(), x3.copy(value = 0.7), y3.copy(value = 0.4))
 
-    val d01 = Distance(initPoint0, initPoint1, 1.375032
-    )
-    val d02 = Distance(initPoint0, initPoint2, 2.361733
-    )
-    val d03 = Distance(initPoint0, initPoint3, 0.773008
-    )
-    val d12 = Distance(initPoint1, initPoint2, 1.151819
-    )
-    val d13 = Distance(initPoint1, initPoint3, 0.541212
-    )
-    val d23 = Distance(initPoint2, initPoint3, 1.740796
-    )
+    val d01 = Distance(initPoint0, initPoint1, 1.375032)
+    val d02 = Distance(initPoint0, initPoint2, 2.361733)
+    val d03 = Distance(initPoint0, initPoint3, 0.773008)
+    val d12 = Distance(initPoint1, initPoint2, 1.151819)
+    val d13 = Distance(initPoint1, initPoint3, 0.541212)
+    val d23 = Distance(initPoint2, initPoint3, 1.740796)
     val distances = listOf(d01, d02, d03, d12, d13, d23)
 
-    val predictedPoints = newtonRaphson(distances, maxIter = 100, h = 1e-5)
+    val predictedPoints = newtonRaphson(distances, maxIter = 10, h = 1e-10)
     println()
+
+
+
 
     for (i in predictedPoints.indices){
         val predicted = predictedPoints[i]
@@ -95,8 +92,6 @@ fun numericalGradient(
     distances: List<Distance>,
     h: Double = 1e-5,
 ): DoubleArray {
-    println("Variables: ${variables.map { it.value }}")
-
     val grad = DoubleArray(variables.size)
     val variableMap = variables.associateBy { it.id }
 
@@ -199,10 +194,11 @@ fun newtonRaphson(
             variable.value -= delta
             points.forEach {
                 if (it.x.id == variable.id){
-                    it.x.value -= delta
+                    it.x.value = variable.value
+                    println("Variable Point: ${it.x}")
                 }
                 if (it.y.id == variable.id){
-                    it.y.value -= delta
+                    it.y.value = variable.value
                 }
             }
         }
@@ -213,7 +209,6 @@ fun newtonRaphson(
         }
 
         points.forEachIndexed { i, point ->
-
             println("Point $i -> x=${point.x.value}, y=${point.y.value}")
         }
 
