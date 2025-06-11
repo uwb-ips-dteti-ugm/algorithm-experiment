@@ -419,7 +419,7 @@ fun euclideanDistance(p1: Point, p2: Point): Double {
     return kotlin.math.sqrt(dx * dx + dy * dy)
 }
 
-fun Point.withNoise(noise: Double = 0.01): Point {
+fun Point.withNoise(noise: Double = 0.1): Point {
     fun generateNoise(base: Double): Double {
         val sign = if (Random.nextBoolean()) 1 else -1
         val scale = Random.nextInt(1, 11) // 1 to 10
