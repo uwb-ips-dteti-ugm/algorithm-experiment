@@ -1,5 +1,6 @@
 import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 fun generateShortId(length: Int = 8): String {
@@ -89,13 +90,13 @@ fun main() {
         id = generateShortId(),
         point1 = actualPointServer,
         point2 = actualPointClient2,
-        distance = 2.23,
+        distance = 2.22,
     )
     val distance12 = Distance(
         id = generateShortId(),
         point1 = actualPointClient1,
         point2 = actualPointClient2,
-        distance = 1.41,
+        distance = 1.40,
     )
     val distances = listOf(distance01, distance02, distance12)
     val fixedPointIds = setOf(actualPointServer.id, actualPointClient1.id)
@@ -103,7 +104,7 @@ fun main() {
         distances,
         fixedPointIds,
         iteration = 10,
-        h = 0.01,
+        h = 0.001,
         tolerance = 0.001
     )
 
@@ -241,6 +242,18 @@ fun newtonRaphson(
         val maxDelta = delta.values.maxOf { abs(it) }
         if (maxDelta < tolerance) {
             println("Converged at iteration ${iter + 1}")
+            println("max error: ${formatPercent(maxDelta)} < tolerance(${tolerance})")
+            println("result variables:")
+            allVariables.values.toList().forEach { println("  ${it.id}: ${it.value}") }
+            println("result points:")
+            points.values.toList().forEach { println("  ${it.id}(${it.x.value}, ${it.y.value})") }
+            println("result distances:")
+            distances.forEach {
+                val p1 = it.point1
+                val p2 = it.point2
+                println("  ${it.id} { ${p1.id}(${p1.x.value}, ${p1.y.value}) -> ${p2.id}(${p2.x.value}, ${p2.y.value}) = ${it.distance} }")
+            }
+            println()
             return@repeat
         }
 
@@ -289,13 +302,17 @@ fun newtonRaphson(
             val ey = calculateError(initial.y.value, point.y.value)
             println("  ${point.id}(error x: ${formatPercent(ex)}, error y: ${formatPercent(ey)})")
         }
-        println("max error: ${formatPercent(maxDelta)} (${if (maxDelta < tolerance) "< tolerance" else "> tolerance"})")
+        println("max error: ${formatPercent(maxDelta)} ${if (maxDelta < tolerance) "< tolerance" else "> tolerance"}(${tolerance})")
 
         println("updated distances:")
         distances.forEach {
             val p1 = it.point1
             val p2 = it.point2
+            val dNew = sqrt(
+                (it.point2.x.value - it.point1.x.value).pow(2) + (it.point2.y.value - it.point1.y.value).pow(2)
+            )
             println("  ${it.id} { ${p1.id}(${p1.x.value}, ${p1.y.value}) -> ${p2.id}(${p2.x.value}, ${p2.y.value}) = ${it.distance} }")
+            println("  Distance from new point: $dNew")
         }
 
         println()
