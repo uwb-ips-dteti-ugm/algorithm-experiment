@@ -106,9 +106,14 @@ fun main() {
     val result = newtonRaphson(
         distances,
         fixedPointIds,
-        h = 1e-10
+        h = 1e-12
     )
-    println(result)
+
+    println("\n== Final Result ==")
+    result.forEach {
+        println("  ${it.id}(${it.x.value}, ${it.y.value})")
+    }
+
 }
 
 fun f(distance: Distance): Double {
@@ -203,7 +208,10 @@ fun newtonRaphson(
         }
         .map { it.key }
 
-    repeat(iteration) {
+    repeat(iteration) { iter ->
+        println("== Iteration ${iter + 1} ==")
+
+        val initialPoints = points.values.map { it.copy() }
         val fMatrix = createF(distances)
         val jacobian = calculateJacobian(distances, variableIds, h)
         val delta = calculateDelta(jacobian, fMatrix)
@@ -215,7 +223,7 @@ fun newtonRaphson(
 
         val maxDelta = delta.maxOf { abs(it) }
         if (maxDelta < tolerance) {
-            println("Converged at iteration ${it + 1}")
+            println("Converged at iteration ${iter + 1}")
             return@repeat
         }
 
@@ -239,6 +247,33 @@ fun newtonRaphson(
                 point2 = points[distance.point2.id] ?: distance.point2
             )
         }
+
+        // Log initial, result points, and distances
+        val resultPoints = points.values.toList()
+
+        println("initial points:")
+        initialPoints.forEach { println("  ${it.id}(${it.x.value}, ${it.y.value})") }
+
+        println("result points:")
+        resultPoints.forEach { println("  ${it.id}(${it.x.value}, ${it.y.value})") }
+
+        println("error points:")
+        resultPoints.forEach { point ->
+            val initial = initialPoints.find { it.id == point.id }!!
+            val ex = calculateError(initial.x.value, point.x.value)
+            val ey = calculateError(initial.y.value, point.y.value)
+            println("  ${point.id}(error x: ${formatPercent(ex)}, error y: ${formatPercent(ey)})")
+        }
+        println("max error: ${formatPercent(maxDelta)} (${if (maxDelta < tolerance) "< tolerance" else "> tolerance"})")
+
+        println("updated distances:")
+        distances.forEach {
+            val p1 = it.point1
+            val p2 = it.point2
+            println("  ${it.id} { ${p1.id}(${p1.x.value}, ${p1.y.value}) -> ${p2.id}(${p2.x.value}, ${p2.y.value}) = ${it.distance} }")
+        }
+
+        println()
     }
 
     return points.values.toList()
@@ -303,5 +338,8 @@ fun invertMatrix(matrix: List<List<Double>>): List<List<Double>> {
     }
     return inv.map { it.toList() }
 }
+
+fun formatPercent(value: Double): String = String.format("%.2f", value) + "%"
+
 
 
