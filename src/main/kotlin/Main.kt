@@ -93,13 +93,13 @@ fun main() {
         id = generateShortId(),
         point1 = actualPointServer,
         point2 = actualPointClient2,
-        distance = 2.167,
+        distance = 2.23,
     )
     val distance12 = Distance(
         id = generateShortId(),
         point1 = actualPointClient1,
         point2 = actualPointClient2,
-        distance = 1.38,
+        distance = 1.41,
     )
     val distances = listOf(distance01, distance02, distance12)
     val fixedPointIds = setOf(actualPointServer.id, actualPointClient1.id)
@@ -179,7 +179,7 @@ fun calculateDelta(jacobian: List<List<Double>>, fMatrix: List<Double>): List<Do
 
     // 5. ΔX = - (Jᵗ * J)⁻¹ * (Jᵗ * F)
     val delta = multiplyMatrix(jtJInv, jtF).map { -it }
-    println("Delta: ${delta}")
+    println("Delta: $delta")
     return delta
 }
 
@@ -204,7 +204,7 @@ fun newtonRaphson(
         .associateBy { it.id }
         .toMutableMap()
 
-    // Hanya ambil variabel dari point yang bukan fixed
+    // Take all the dynamic points
     val variableIds = allVariables
         .filter { (id, variable) ->
             val parentPoint = points.values.find { it.x.id == id || it.y.id == id }
@@ -321,7 +321,11 @@ fun multiplyMatrix(a: List<List<Double>>, b: List<Double>): List<Double> {
 fun invertMatrix(matrix: List<List<Double>>): List<List<Double>> {
     val n = matrix.size
     val a = Array(n) { matrix[it].toDoubleArray() }
-    val inv = Array(n) { DoubleArray(n) { if (it == it) 1.0 else 0.0 } }
+    val inv = Array(n) { i ->
+        DoubleArray(n) { j ->
+            if (i == j) 1.0 else 0.0
+        }
+    }
 
     for (i in 0 until n) {
         var factor = a[i][i]
