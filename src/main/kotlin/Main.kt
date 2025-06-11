@@ -3,21 +3,6 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-fun generateShortId(length: Int = 8): String {
-    val chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    return (1..length)
-        .map { chars[Random.nextInt(chars.length)] }
-        .joinToString("")
-}
-
-fun calculateError(previousValue: Double, currentValue: Double): Double {
-    return if (previousValue != 0.0) {
-        ((currentValue - previousValue) / previousValue) * 100
-    } else {
-        0.0
-    }
-}
-
 data class Variable(
     val id: String,
     var value: Double,
@@ -37,81 +22,116 @@ data class Distance(
 )
 
 fun main() {
-//    Case: 2 Node [1 Server(0,0), 1 Client(x, 0)]
-    val xActualServer = Variable(
-        id = generateShortId(),
-        value = 0.0,
-    )
-    val yActualServer = Variable(
-        id = generateShortId(),
-        value = 0.0,
-    )
-    val actualPointServer = Point(
-        id = generateShortId(),
-        x = xActualServer,
-        y = yActualServer
-    )
 
-    val xActualClient1 = Variable(
-        id = generateShortId(),
-        value = 3.0,
-    )
-    val yActualClient1 = Variable(
-        id = generateShortId(),
-        value = 0.0,
-    )
-    val actualPointClient1 = Point(
-        id = generateShortId(),
-        x = xActualClient1,
-        y = yActualClient1
-    )
+    val pointServer = createPoint(0.0, 0.0)
+    val pointClient1 = createPoint(3.0, 0.0)
+    val pointClient2 = createPoint(2.0, 1.0)
+    val pointClient3 = createPoint(1.5, -2.0)
+    val pointClient4 = createPoint(-1.0, -2.5)
+    val pointClient5 = createPoint(-2.0, 3.0)
+    val fixedPointIds = setOf(pointServer.id, pointClient1.id)
 
-    val xActualClient2 = Variable(
-        id = generateShortId(),
-        value = 1.9,
+//    Case 1: 3 Node [Server(0,0), Client 1(x, 0), Client 2(x, y)]
+    println("\n== 3 Points ==")
+    val point3distances = listOf(
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient1, distance = euclideanDistance(pointServer, pointClient1)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointServer, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointClient1, pointClient2)),
     )
-    val yActualClient2 = Variable(
-        id = generateShortId(),
-        value = 1.1,
-    )
-    val actualPointClient2 = Point(
-        id = generateShortId(),
-        x = xActualClient2,
-        y = yActualClient2
-    )
-
-    val distance01 = Distance(
-        id = generateShortId(),
-        point1 = actualPointServer,
-        point2 = actualPointClient1,
-        distance = 3.0,
-    )
-    val distance02 = Distance(
-        id = generateShortId(),
-        point1 = actualPointServer,
-        point2 = actualPointClient2,
-        distance = 2.22,
-    )
-    val distance12 = Distance(
-        id = generateShortId(),
-        point1 = actualPointClient1,
-        point2 = actualPointClient2,
-        distance = 1.40,
-    )
-    val distances = listOf(distance01, distance02, distance12)
-    val fixedPointIds = setOf(actualPointServer.id, actualPointClient1.id)
-    val result = newtonRaphson(
-        distances,
+    val result3Points = newtonRaphson(
+        point3distances,
         fixedPointIds,
         iteration = 10,
         h = 0.001,
         tolerance = 0.001
     )
-
-    println("\n== Final Result ==")
-    result.forEach {
+    println("\n== Final Result (3 Points )==")
+    result3Points.forEach {
         println("  ${it.id}(${it.x.value}, ${it.y.value})")
     }
+    println()
+
+//    Case 2: 4 Node [Server(0,0), Client 1(x, 0), Client 2(x, y), Client 3(x, y)]
+    println("\n== 4 Points ==")
+    val point4distances = listOf(
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient1, distance = euclideanDistance(pointServer, pointClient1)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointServer, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient3.withNoise(), distance = euclideanDistance(pointServer, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointClient1, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient3.withNoise(), distance = euclideanDistance(pointClient1, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointClient2.withNoise(), point2 = pointClient3.withNoise(), distance = euclideanDistance(pointClient2, pointClient3)),
+    )
+    val result4Points = newtonRaphson(
+        initialDistances = point4distances,
+        fixedPointIds = fixedPointIds,
+        iteration = 10,
+        h = 0.001,
+        tolerance = 0.001
+    )
+    println("\n== Final Result (4 Points) ==")
+    result4Points.forEach {
+        println("  ${it.id}(${it.x.value}, ${it.y.value})")
+    }
+    println()
+
+//    Case 3: 5 Node [Server(0,0), Client 1(x, 0), Client 2(x, y), Client 3(x, y), Client 4(x, y)]
+    println("\n== 5 Points ==")
+    val point5distances = listOf(
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient1, distance = euclideanDistance(pointServer, pointClient1)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointServer, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient3.withNoise(), distance = euclideanDistance(pointServer, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient4.withNoise(), distance = euclideanDistance(pointServer, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointClient1, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient3.withNoise(), distance = euclideanDistance(pointClient1, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient4.withNoise(), distance = euclideanDistance(pointClient1, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointClient2.withNoise(), point2 = pointClient3.withNoise(), distance = euclideanDistance(pointClient2, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointClient2.withNoise(), point2 = pointClient4.withNoise(), distance = euclideanDistance(pointClient2, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointClient3.withNoise(), point2 = pointClient4.withNoise(), distance = euclideanDistance(pointClient3, pointClient4)),
+    )
+    val result5Points = newtonRaphson(
+        initialDistances = point5distances,
+        fixedPointIds = fixedPointIds,
+        iteration = 10,
+        h = 0.001,
+        tolerance = 0.001
+    )
+    println("\n== Final Result (5 Points) ==")
+    result5Points.forEach {
+        println("  ${it.id}(${it.x.value}, ${it.y.value})")
+    }
+    println()
+
+//    Case 4: 6 Node [Server(0,0), Client 1(x, 0), Client 2(x, y), Client 3(x, y), Client 4(x, y), Client 5(x, y)]
+    println("\n== 6 Points ==")
+    val point6distances = listOf(
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient1, distance = euclideanDistance(pointServer, pointClient1)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointServer, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient3.withNoise(), distance = euclideanDistance(pointServer, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient4.withNoise(), distance = euclideanDistance(pointServer, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointServer, point2 = pointClient5.withNoise(), distance = euclideanDistance(pointServer, pointClient5)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient2.withNoise(), distance = euclideanDistance(pointClient1, pointClient2)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient3.withNoise(), distance = euclideanDistance(pointClient1, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient4.withNoise(), distance = euclideanDistance(pointClient1, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointClient1, point2 = pointClient5.withNoise(), distance = euclideanDistance(pointClient1, pointClient5)),
+        Distance(id = generateShortId(), point1 = pointClient2.withNoise(), point2 = pointClient3.withNoise(), distance = euclideanDistance(pointClient2, pointClient3)),
+        Distance(id = generateShortId(), point1 = pointClient2.withNoise(), point2 = pointClient4.withNoise(), distance = euclideanDistance(pointClient2, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointClient2.withNoise(), point2 = pointClient5.withNoise(), distance = euclideanDistance(pointClient2, pointClient5)),
+        Distance(id = generateShortId(), point1 = pointClient3.withNoise(), point2 = pointClient4.withNoise(), distance = euclideanDistance(pointClient3, pointClient4)),
+        Distance(id = generateShortId(), point1 = pointClient3.withNoise(), point2 = pointClient5.withNoise(), distance = euclideanDistance(pointClient3, pointClient5)),
+        Distance(id = generateShortId(), point1 = pointClient4.withNoise(), point2 = pointClient5.withNoise(), distance = euclideanDistance(pointClient4, pointClient5)),
+    )
+    val result6Points = newtonRaphson(
+        initialDistances = point6distances,
+        fixedPointIds = fixedPointIds,
+        iteration = 10,
+        h = 0.001,
+        tolerance = 0.001
+    )
+    println("\n== Final Result (6 Points) ==")
+    result6Points.forEach {
+        println("  ${it.id}(${it.x.value}, ${it.y.value})")
+    }
+    println()
 
 }
 
@@ -254,7 +274,7 @@ fun newtonRaphson(
                 println("  ${it.id} { ${p1.id}(${p1.x.value}, ${p1.y.value}) -> ${p2.id}(${p2.x.value}, ${p2.y.value}) = ${it.distance} }")
             }
             println()
-            return@repeat
+            return points.values.toList()
         }
 
         // Update only unfixed variables
@@ -387,5 +407,45 @@ fun invertMatrix(matrix: List<List<Double>>): List<List<Double>> {
 
 fun formatPercent(value: Double): String = String.format("%.2f", value) + "%"
 
+fun createPoint(xVal: Double, yVal: Double): Point {
+    val x = Variable(id = generateShortId(), value = xVal)
+    val y = Variable(id = generateShortId(), value = yVal)
+    return Point(id = generateShortId(), x = x, y = y)
+}
 
+fun euclideanDistance(p1: Point, p2: Point): Double {
+    val dx = p1.x.value - p2.x.value
+    val dy = p1.y.value - p2.y.value
+    return kotlin.math.sqrt(dx * dx + dy * dy)
+}
 
+fun Point.withNoise(noise: Double = 0.01): Point {
+    fun generateNoise(base: Double): Double {
+        val sign = if (Random.nextBoolean()) 1 else -1
+        val scale = Random.nextInt(1, 11) // 1 to 10
+        return sign * noise * scale * base
+    }
+
+    val xNoise = generateNoise(this.x.value)
+    val yNoise = generateNoise(this.y.value)
+
+    return this.copy(
+        x = this.x.copy(value = this.x.value + xNoise),
+        y = this.y.copy(value = this.y.value + yNoise)
+    )
+}
+
+fun generateShortId(length: Int = 8): String {
+    val chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    return (1..length)
+        .map { chars[Random.nextInt(chars.length)] }
+        .joinToString("")
+}
+
+fun calculateError(previousValue: Double, currentValue: Double): Double {
+    return if (previousValue != 0.0) {
+        ((currentValue - previousValue) / previousValue) * 100
+    } else {
+        0.0
+    }
+}
