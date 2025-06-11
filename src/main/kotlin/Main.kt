@@ -21,6 +21,9 @@ data class Distance(
     val distance: Double,
 )
 
+// Kalibrasi sebelum perhitungan
+// Regresi Linear untuk overdetermined
+
 fun main() {
 
     val pointServer = createPoint(0.0, 0.0)
@@ -334,7 +337,6 @@ fun newtonRaphson(
             println("  ${it.id} { ${p1.id}(${p1.x.value}, ${p1.y.value}) -> ${p2.id}(${p2.x.value}, ${p2.y.value}) = ${it.distance} }")
             println("  Distance from new point: $dNew")
         }
-
         println()
     }
 
