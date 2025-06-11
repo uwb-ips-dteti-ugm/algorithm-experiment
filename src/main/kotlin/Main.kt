@@ -106,7 +106,9 @@ fun main() {
     val result = newtonRaphson(
         distances,
         fixedPointIds,
-        h = 1e-12
+        iteration = 4,
+        h = 0.01,
+        tolerance = 0.01
     )
 
     println("\n== Final Result ==")
@@ -176,14 +178,16 @@ fun calculateDelta(jacobian: List<List<Double>>, fMatrix: List<Double>): List<Do
     val jtF = multiplyMatrix(jT, fMatrix)
 
     // 5. ΔX = - (Jᵗ * J)⁻¹ * (Jᵗ * F)
-    return multiplyMatrix(jtJInv, jtF).map { -it }
+    val delta = multiplyMatrix(jtJInv, jtF).map { -it }
+    println("Delta: ${delta}")
+    return delta
 }
 
 fun newtonRaphson(
     initialDistances: List<Distance>,
     fixedPointIds: Set<String>,
     iteration: Int = 10,
-    tolerance: Double = 1e-10,
+    tolerance: Double = 0.001,
     h: Double = 1e-5,
 ): List<Point> {
     var distances = initialDistances.toList()
