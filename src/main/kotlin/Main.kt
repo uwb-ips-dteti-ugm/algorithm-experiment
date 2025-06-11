@@ -51,10 +51,6 @@ fun main() {
         y = yActualServer
     )
 
-    val pointsKnowledge = mutableListOf(
-        actualPointServer
-    )
-
     val xActualClient1 = Variable(
         id = generateShortId(),
         value = 3.0,
@@ -106,9 +102,9 @@ fun main() {
     val result = newtonRaphson(
         distances,
         fixedPointIds,
-        iteration = 4,
+        iteration = 10,
         h = 0.01,
-        tolerance = 0.01
+        tolerance = 0.001
     )
 
     println("\n== Final Result ==")
@@ -128,21 +124,20 @@ fun f(distance: Distance): Double {
     return (x2 - x1).pow(2.0) + (y2 - y1).pow(2.0) - d.pow(2.0)
 }
 
-fun createF(distances: List<Distance>) : List<Double>{
-    return distances.map {
-        f(it)
-    }
+fun createF(distances: List<Distance>): Map<String, Double> {
+    return distances.associate { it.id to f(it) }
 }
+
 
 fun calculateJacobian(
     distances: List<Distance>,
-    variableIds: List<String>, // hanya variable yang boleh dihitung
+    variableIds: List<String>,
     h: Double = 1e-5
-): List<List<Double>> {
-    val jacobian = mutableListOf<MutableList<Double>>()
+): Map<String, Map<String, Double>> {
+    val jacobian = mutableMapOf<String, MutableMap<String, Double>>()
 
     for (distance in distances) {
-        val row = mutableListOf<Double>()
+        val row = mutableMapOf<String, Double>()
 
         for (varId in variableIds) {
             val value = when (varId) {
@@ -152,42 +147,58 @@ fun calculateJacobian(
                 distance.point2.y.id -> centralDifference(distance, { d, delta -> d.withPoint2Y(d.point2.y.value + delta) }, h)
                 else -> 0.0
             }
-            row.add(value)
+            row[varId] = value
         }
 
-        jacobian.add(row)
+        jacobian[distance.id] = row
     }
 
     return jacobian
 }
 
-fun calculateDelta(jacobian: List<List<Double>>, fMatrix: List<Double>): List<Double> {
-    val m = jacobian.size
-    val n = jacobian[0].size
+fun calculateDelta(
+    jacobian: Map<String, Map<String, Double>>,
+    fMap: Map<String, Double>
+): Map<String, Double> {
+    val distanceIds = jacobian.keys.toList()
+    val variableIds = jacobian.values.firstOrNull()?.keys?.toList() ?: emptyList()
+
+    // Build jacobian matrix and f vector in correct order
+    val jacobianMatrix = distanceIds.map { distId ->
+        variableIds.map { varId ->
+            jacobian[distId]?.get(varId) ?: 0.0
+        }
+    }
+    val fVector = distanceIds.map { fMap[it] ?: 0.0 }
 
     // 1. transposeMatrix of Jacobian (n x m)
-    val jT = transposeMatrix(jacobian)
+    val jT = transposeMatrix(jacobianMatrix)
 
     // 2. Jᵗ * J  => (n x n)
-    val jtJ = multiply2DMatrix(jT, jacobian)
+    val jtJ = multiply2DMatrix(jT, jacobianMatrix)
 
     // 3. Invert (Jᵗ * J)
     val jtJInv = invertMatrix(jtJ)
 
     // 4. Jᵗ * F  => (n x 1)
-    val jtF = multiplyMatrix(jT, fMatrix)
+    val jtF = multiplyMatrix(jT, fVector)
 
     // 5. ΔX = - (Jᵗ * J)⁻¹ * (Jᵗ * F)
     val delta = multiplyMatrix(jtJInv, jtF).map { -it }
-    println("Delta: $delta")
-    return delta
+
+    val deltaMap = variableIds.zip(delta).toMap()
+
+    println("Delta:")
+    deltaMap.forEach { (id, value) -> println("  $id: $value") }
+
+    return deltaMap
 }
 
 fun newtonRaphson(
     initialDistances: List<Distance>,
     fixedPointIds: Set<String>,
     iteration: Int = 10,
-    tolerance: Double = 0.001,
+    tolerance: Double = 1e-10,
     h: Double = 1e-5,
 ): List<Point> {
     var distances = initialDistances.toList()
@@ -216,6 +227,8 @@ fun newtonRaphson(
         println("== Iteration ${iter + 1} ==")
 
         val initialPoints = points.values.map { it.copy() }
+        val initialVariables = allVariables.values.map { it.copy() }
+
         val fMatrix = createF(distances)
         val jacobian = calculateJacobian(distances, variableIds, h)
         val delta = calculateDelta(jacobian, fMatrix)
@@ -225,16 +238,17 @@ fun newtonRaphson(
             return@repeat
         }
 
-        val maxDelta = delta.maxOf { abs(it) }
+        val maxDelta = delta.values.maxOf { abs(it) }
         if (maxDelta < tolerance) {
             println("Converged at iteration ${iter + 1}")
             return@repeat
         }
 
         // Update only unfixed variables
-        variableIds.forEachIndexed { index, varId ->
-            val variable = allVariables[varId] ?: return@forEachIndexed
-            allVariables[varId] = variable.copy(value = variable.value + delta[index])
+        variableIds.forEach { varId ->
+            val variable = allVariables[varId] ?: return@forEach
+            val delta = delta[varId] ?: 0.0
+            allVariables[varId] = variable.copy(value = variable.value + delta)
         }
 
         // Update points with new variables
@@ -252,8 +266,15 @@ fun newtonRaphson(
             )
         }
 
-        // Log initial, result points, and distances
+        // Log initial, variables, points, and distances
+        val resultVariables = allVariables.values.toList()
         val resultPoints = points.values.toList()
+
+        println("initial variables:")
+        initialVariables.forEach { println("  ${it.id}: ${it.value}") }
+
+        println("result variables:")
+        resultVariables.forEach { println("  ${it.id}: ${it.value}") }
 
         println("initial points:")
         initialPoints.forEach { println("  ${it.id}(${it.x.value}, ${it.y.value})") }
