@@ -1,0 +1,154 @@
+Converged,FinalError,TotalElapsedMs,Tolerance,h
+true,3.3194910488370025E-4,91,0.001,0.001
+
+Initial Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+
+Predicted Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666666636,0.8116255657520427
+
+Result Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+
+Iterations
+Iteration 1,ElapsedMs 64
+Initial Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,2.0,1.0
+Updated Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666658576,6.148333333333012
+Updated Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+Error Points
+PointId,ErrorX,ErrorY
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,0.0,0.0
+JEMG5ooG,-163.08333333329287,514.8333333333012
+
+Iteration 2,ElapsedMs 3
+Initial Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666658576,6.148333333333012
+Updated Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.26166666666309,3.1276931417729603
+Updated Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+Error Points
+PointId,ErrorX,ErrorY
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,0.0,0.0
+JEMG5ooG,-2.1935777720903817E-10,-49.12941488035039
+
+Iteration 3,ElapsedMs 3
+Initial Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.26166666666309,3.1276931417729603
+Updated Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666666658,1.6690674465272783
+Updated Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+Error Points
+PointId,ErrorX,ErrorY
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,0.0,0.0
+JEMG5ooG,2.834192590004894E-10,-46.63583123819005
+
+Iteration 4,ElapsedMs 5
+Initial Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666666658,1.6690674465272783
+Updated Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666664793,1.0317088654641622
+Updated Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+Error Points
+PointId,ErrorX,ErrorY
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,0.0,0.0
+JEMG5ooG,-1.4783418874797337E-11,-38.186508423564746
+
+Iteration 5,ElapsedMs 3
+Initial Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666664793,1.0317088654641622
+Updated Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.261666666666638,0.8348384233979292
+Updated Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+Error Points
+PointId,ErrorX,ErrorY
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,0.0,0.0
+JEMG5ooG,1.2583505351763881E-11,-19.081976384652044
+
+Iteration 6,ElapsedMs 3
+Initial Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.261666666666638,0.8348384233979292
+Updated Points
+Id,X,Y
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,3.0,0.0
+JEMG5ooG,-1.2616666666666636,0.8116255657520427
+Updated Distances
+Id,Point1,Point2,Distance
+YJuqsCVk,Gs5jhk1b,5TnsTbHh,5.1
+VvKxLibH,Gs5jhk1b,JEMG5ooG,1.5
+ikUd0ADe,5TnsTbHh,JEMG5ooG,4.338202392696773
+Error Points
+PointId,ErrorX,ErrorY
+Gs5jhk1b,0.0,0.0
+5TnsTbHh,0.0,0.0
+JEMG5ooG,2.0239204411925375E-12,-2.7805209960756727
+
